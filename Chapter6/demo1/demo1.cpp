@@ -1,19 +1,45 @@
 ﻿#define WIN32_LEAN_AND_MEAN
+#define INITGUID //make sure directx guids are include
 
-#include <Windows.h>
-#include <windowsx.h>
-#include <stdlib.h>
+#include <windows.h>   // include important windows stuff
+#include <windowsx.h> 
+//#include <mmsystem.h>
+//#include <iostream> // include important C/C++ stuff
+//#include <conio.h>
+//#include <stdlib.h>
+//#include <malloc.h>
+//#include <memory.h>
+//#include <string.h>
+//#include <stdarg.h>
+//#include <stdio.h> 
+//#include <math.h>
+//#include <io.h>
+//#include <fcntl.h>
+
 #include <ddraw.h>
 
 
 
 #pragma region 声明/定义
 
+
+
+typedef unsigned short USHORT;
+typedef unsigned short WORD;
+typedef unsigned char  UCHAR;
+typedef unsigned char  BYTE;
+
+
 #define WINDOW_CLASS_NAME L"WINDOW_CLASS"
 
 HWND main_window_handle;
+HINSTANCE main_instance;
 LPDIRECTDRAW7 lpdd;
 
+
+
+#define KEYDOWN(vk_code) ((GetAsyncKeyState(vk_code) & 0x8000) ? 1 : 0)
+#define KEYUP(vk_code)   ((GetAsyncKeyState(vk_code) & 0x8000) ? 0 : 1)
 
 
 bool GameInit();
@@ -24,6 +50,7 @@ void GameQuit();
 
 
 #pragma endregion 声明
+
 
 
 
@@ -103,6 +130,8 @@ int WINAPI WinMain(HINSTANCE hinstance,
 	winclass.lpszMenuName = NULL;
 	winclass.lpszClassName = WINDOW_CLASS_NAME;
 	winclass.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+
+	main_instance = hinstance;
 
 	// register the window class
 	if (!RegisterClassEx(&winclass))
