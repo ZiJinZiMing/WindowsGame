@@ -1,9 +1,18 @@
 ﻿#define WIN32_LEAN_AND_MEAN
 #define INITGUID //make sure directx guids are include
+#define _CRT_SECURE_NO_WARNINGS
 
+
+#include <cstdio>
 #include <windows.h>   // include important windows stuff
 #include <windowsx.h>
 #include <ddraw.h>
+#include <fstream>
+#include <cstdarg>
+
+
+
+using namespace std;
 
 
 #pragma region 声明/定义
@@ -23,6 +32,8 @@ typedef unsigned char BYTE;
 HWND main_window_handle;
 HINSTANCE main_instance;
 LPDIRECTDRAW7 lpdd;
+ofstream fout;
+
 
 
 #define KEYDOWN(vk_code) ((GetAsyncKeyState(vk_code) & 0x8000) ? 1 : 0)
@@ -32,6 +43,26 @@ LPDIRECTDRAW7 lpdd;
 bool GameInit();
 void GameMain();
 void GameQuit();
+
+
+const int bufferLen = 1024;
+char buffer[bufferLen];
+
+#define LOG_INFO(format,...) \
+	fout <<  __FILE__  << "["  << __FUNCTION__<<  ":" <<  __LINE__ << "]" << formatStr(format,__VA_ARGS__) << endl;
+
+
+char* formatStr(const char* format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	// vprintf(format,args);
+	memset(buffer, 0, bufferLen);
+	vsprintf(buffer, format, args);
+	va_end(args);
+	return buffer;
+}
+
 
 
 #pragma endregion
@@ -168,6 +199,11 @@ int WINAPI WinMain(HINSTANCE hinstance,
 
 bool GameInit()
 {
+	fout.open("log.log",ios_base::out);
+
+	LOG_INFO("GameInit");
+	
+	
 	//创建IDD7对象
 	if (FAILED(DirectDrawCreateEx(NULL, (void**)&lpdd, IID_IDirectDraw7, NULL))) return false;
 	//设置CooperativeLevel
@@ -190,11 +226,17 @@ void GameMain()
 
 void GameQuit()
 {
+
+	LOG_INFO("GameQuit");
 	if (lpdd)
 	{
 		lpdd->Release();
 		lpdd = nullptr;
 	}
+
+
+	
+	fout.close();
 }
 
 
