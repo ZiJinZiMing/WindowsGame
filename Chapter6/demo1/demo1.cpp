@@ -2,40 +2,27 @@
 #define INITGUID //make sure directx guids are include
 
 #include <windows.h>   // include important windows stuff
-#include <windowsx.h> 
-//#include <mmsystem.h>
-//#include <iostream> // include important C/C++ stuff
-//#include <conio.h>
-//#include <stdlib.h>
-//#include <malloc.h>
-//#include <memory.h>
-//#include <string.h>
-//#include <stdarg.h>
-//#include <stdio.h> 
-//#include <math.h>
-//#include <io.h>
-//#include <fcntl.h>
-
+#include <windowsx.h>
 #include <ddraw.h>
-
 
 
 #pragma region 声明/定义
 
-
-
 typedef unsigned short USHORT;
 typedef unsigned short WORD;
-typedef unsigned char  UCHAR;
-typedef unsigned char  BYTE;
+typedef unsigned char UCHAR;
+typedef unsigned char BYTE;
 
 
 #define WINDOW_CLASS_NAME L"WINDOW_CLASS"
+#define SCREEN_WIDTH 1920//屏幕宽度
+#define SCREEN_HEIGHT 1080//屏幕高度
+#define SCREEN_BPP 32//BPP
+
 
 HWND main_window_handle;
 HINSTANCE main_instance;
 LPDIRECTDRAW7 lpdd;
-
 
 
 #define KEYDOWN(vk_code) ((GetAsyncKeyState(vk_code) & 0x8000) ? 1 : 0)
@@ -47,74 +34,70 @@ void GameMain();
 void GameQuit();
 
 
-
-
-#pragma endregion 声明
-
-
+#pragma endregion
 
 
 #pragma region window窗口
 
 LRESULT CALLBACK WindowProc(HWND hwnd,
-	UINT msg,
-	WPARAM wparam,
-	LPARAM lparam)
+                            UINT msg,
+                            WPARAM wparam,
+                            LPARAM lparam)
 {
 	// this is the main message handler of the system
-	PAINTSTRUCT		ps;		// used in WM_PAINT
-	HDC				hdc;	// handle to a device context
+	PAINTSTRUCT ps; // used in WM_PAINT
+	HDC hdc; // handle to a device context
 
 	// what is the message 
 	switch (msg)
 	{
 	case WM_CREATE:
-	{
-		// do initialization stuff here
+		{
+			// do initialization stuff here
 
-		// return success
-		return(0);
-	} break;
+			// return success
+			return (0);
+		}
+		break;
 
 	case WM_PAINT:
-	{
-		// simply validate the window
-		hdc = BeginPaint(hwnd, &ps);
-		// you would do all your painting here
-		EndPaint(hwnd, &ps);
+		{
+			// simply validate the window
+			hdc = BeginPaint(hwnd, &ps);
+			// you would do all your painting here
+			EndPaint(hwnd, &ps);
 
-		// return success
-		return(0);
-	} break;
+			// return success
+			return (0);
+		}
+		break;
 
 	case WM_DESTROY:
-	{
-		// kill the application, this sends a WM_QUIT message 
-		PostQuitMessage(0);
+		{
+			// kill the application, this sends a WM_QUIT message 
+			PostQuitMessage(0);
 
-		// return success
-		return(0);
-	} break;
+			// return success
+			return (0);
+		}
+		break;
 
-	default:break;
-
+	default: break;
 	} // end switch
 
-// process any messages that we didn't take care of 
+	// process any messages that we didn't take care of 
 	return (DefWindowProc(hwnd, msg, wparam, lparam));
-
 } // end WinProc
 
 // WINMAIN ////////////////////////////////////////////////
 int WINAPI WinMain(HINSTANCE hinstance,
-	HINSTANCE hprevinstance,
-	LPSTR lpcmdline,
-	int ncmdshow)
+                   HINSTANCE hprevinstance,
+                   LPSTR lpcmdline,
+                   int ncmdshow)
 {
-
 	WNDCLASSEX winclass; // this will hold the class we create
 	//HWND	   hwnd;	 // generic window handle
-	MSG		   msg;		 // generic message
+	MSG msg; // generic message
 
 	// first fill in the window class stucture
 	winclass.cbSize = sizeof(WNDCLASSEX);
@@ -135,20 +118,20 @@ int WINAPI WinMain(HINSTANCE hinstance,
 
 	// register the window class
 	if (!RegisterClassEx(&winclass))
-		return(0);
+		return (0);
 
 	// create the first window
-	if (!(main_window_handle = CreateWindowEx(NULL,                  // extended style
-		WINDOW_CLASS_NAME,     // class
-		L"我的WIndow窗口", // title
-		WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-		0, 0,	    // initial x,y
-		400, 400,  // initial width, height
-		NULL,	    // handle to parent 
-		NULL,	    // handle to menu
-		hinstance,// instance of this application
-		NULL)))	// extra creation parms
-		return(0);
+	if (!(main_window_handle = CreateWindowEx(NULL, // extended style
+	                                          WINDOW_CLASS_NAME, // class
+	                                          L"我的WIndow窗口", // title
+	                                          WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+	                                          0, 0, // initial x,y
+	                                          SCREEN_WIDTH,SCREEN_HEIGHT, // initial width, height
+	                                          NULL, // handle to parent 
+	                                          NULL, // handle to menu
+	                                          hinstance, // instance of this application
+	                                          NULL))) // extra creation parms
+		return (0);
 
 	if (!GameInit())return 1;
 	// enter main event loop, but this time we use PeekMessage()
@@ -169,34 +152,44 @@ int WINAPI WinMain(HINSTANCE hinstance,
 			DispatchMessage(&msg);
 		} // end if
 
-	 // main game processing goes here
+		// main game processing goes here
 		GameMain();
-
 	} // end while
 
 	GameQuit();
 	// return to Windows like this
-	return(msg.wParam);
-
+	return (msg.wParam);
 } // end WinMain
 
-#pragma endregion window窗口
+#pragma endregion
 
 
 #pragma region 游戏逻辑
 
-bool GameInit() {
-	
+bool GameInit()
+{
+	//创建IDD7对象
 	if (FAILED(DirectDrawCreateEx(NULL, (void**)&lpdd, IID_IDirectDraw7, NULL))) return false;
-	if (FAILED(lpdd->SetCooperativeLevel(main_window_handle, DDSCL_NORMAL)))return false;
+	//设置CooperativeLevel
+	//if (FAILED(lpdd->SetCooperativeLevel(main_window_handle, DDSCL_FULLSCREEN | DDSCL_ALLOWMODEX | DDSCL_EXCLUSIVE | DDSCL_ALLOWREBOOT)))return false;
+
+	if (FAILED(lpdd->SetCooperativeLevel(main_window_handle,DDSCL_NORMAL)))return false;
+	if (FAILED(lpdd->SetDisplayMode(SCREEN_WIDTH,SCREEN_HEIGHT,SCREEN_BPP,0,0)))return false;
+
+
 	return true;
 }
 
-void GameMain() {
-
+void GameMain()
+{
+	if (KEYDOWN(VK_ESCAPE))
+	{
+		SendMessage(main_window_handle,WM_CLOSE, 0, 0);
+	}
 }
 
-void GameQuit() {
+void GameQuit()
+{
 	if (lpdd)
 	{
 		lpdd->Release();
@@ -205,4 +198,4 @@ void GameQuit() {
 }
 
 
-#pragma endregion 游戏逻辑
+#pragma endregion
