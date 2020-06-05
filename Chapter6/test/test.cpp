@@ -3,44 +3,31 @@
 #include <cstdarg>
 #include <iostream>
 #include <fstream>
+#include <cstdio>
+#include "spdlog/spdlog.h"
+#include "spdlog/cfg/env.h" // for loading levels from the environment variable
+#include "spdlog/sinks/stdout_color_sinks.h"
 
 using namespace std;
 
-
-ofstream fout;
-
-
-const int bufferLen = 1024;
-char buffer[bufferLen];
-
-#define DEBUG_LOG(format,...) \
-	fout <<  __FILE__  << "["  << __FUNCTION__<<  ":" <<  __LINE__ << "]" << formatStr(format,__VA_ARGS__) << endl;
-
-
-char* formatStr(const char* format, ...)
-{
-	va_list args;
-	va_start(args, format);
-	// vprintf(format,args);
-	memset(buffer, 0, bufferLen);
-	vsprintf(buffer, format, args);
-	va_end(args);
-	return buffer;
-}
 
 
 
 int main()
 {
-	fout.open("out.log", ios_base::out);
+    spdlog::cfg::load_env_levels();
+	// spdlog::info("hello world");
+ //
+ //    auto console = spdlog::stdout_color_mt("console");
+ //
+	// console->info("hello console");
+	// 
 
-	DEBUG_LOG("%s %d","hello",10);
-	DEBUG_LOG("%s %d","world",20);
-	DEBUG_LOG("%s %d","cpp",30);
 
+	SPDLOG_INFO("hello {0}",123);
+	SPDLOG_INFO("hello {0} {1}","world", "logger");
 
-	fout.flush();
-	fout.close();
+	spdlog::shutdown();
 }
 
 // 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单
